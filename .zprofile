@@ -6,10 +6,6 @@ for file in ~/.{path,zprompt,exports,aliases,functions}; do
 done;
 unset file;
 
-# Set PATH, MANPATH, etc., for Homebrew.
-source "/opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc";
-eval "$(/opt/homebrew/bin/brew shellenv)";
-
 # https://code.visualstudio.com/remote/advancedcontainers/sharing-git-credentials#_using-ssh-keys
 if [ -z "$SSH_AUTH_SOCK" ]; then
    # Check for a currently running instance of the agent
