@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+
+autoload -Uz vcs_info context;
+precmd() { vcs_info; }
+zstyle ':vcs_info:git:*' formats '%b';
+setopt PROMPT_SUBST;
+
+PROMPT='%F{49}%n%f %F{39}[$(kubectl config current-context)]%f %1d %F{208}(${vcs_info_msg_0_})%f λ ';

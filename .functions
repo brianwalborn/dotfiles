@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+
+# remove deleted branches
+function clean() {
+  DELETED_BRANCHES=($(git branch -v | grep '\[gone\]' | awk '{ print $1 }' | tr '\n' ' ' | xargs));
+
+  for BRANCH in "${DELETED_BRANCHES[@]}"; do git branch -D $BRANCH; done
+}

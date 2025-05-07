@@ -1,0 +1,1 @@
+[ -n "$PROMPT" ] && source ~/.zprofile;

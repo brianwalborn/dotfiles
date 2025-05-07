@@ -1,0 +1,48 @@
+#!/usr/bin/env zsh
+
+# aws
+alias awslocal="aws --endpoint-url=http://localhost:4566"
+alias sso="aws configure sso"
+
+# git
+alias branches="git branch -v"
+alias main="git checkout main"
+alias nb="git checkout -b"
+alias prune="git fetch --prune"
+alias pull="git pull"
+alias stage="git add ."
+alias status="git status"
+
+# kubernetes
+alias ctx_certification="export AWS_PROFILE=cert && kubectl config use-context cert"
+alias ctx_develop="export AWS_PROFILE=develop && kubectl config use-context develop"
+alias ctx_local="kubectl config use-context docker-desktop"
+alias ctx_production="export AWS_PROFILE=production && kubectl config use-context production"
+alias ctx_sandbox="export AWS_PROFILE=sandbox && kubectl config use-context sandbox"
+alias ctx_staging="export AWS_PROFILE=staging && kubectl config use-context staging"
+alias ctx_tools_develop="export AWS_PROFILE=tools-develop && kubectl config use-context tools-develop"
+alias ctx_tools_production="export AWS_PROFILE=tools-production && kubectl config use-context tools-production"
+alias contexts="kubectl config get-contexts"
+alias deployments="kubectl get deployments"
+alias homelab="kubectl config use-context homelab"
+alias k="kubectl"
+alias kd="kubectl describe"
+alias kg="kubectl get"
+alias kl="kubectl logs -f"
+alias namespaces="kubectl get namespaces"
+alias ns="kubectl config set-context --current --namespace"
+alias pods="kubectl get pods"
+alias secrets="kubectl get secrets"
+alias services="kubectl get services"
+
+# shortcuts
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+alias .....="cd ../../../.."
+
+# vs code
+alias code="code -r"
+
+# other
+alias c="clear"
