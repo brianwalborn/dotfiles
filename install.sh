@@ -8,6 +8,7 @@ function install() {
 	rsync --exclude ".git/" \
 		--exclude ".DS_Store" \
 		--exclude "install.sh" \
+  		--exclude "README.md" \
 		-avh --no-perms . ~;
 
 	source ~/.zprofile;
