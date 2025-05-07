@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 
 cd "$(dirname "${ZSH_SOURCE}")";
 
@@ -13,10 +13,10 @@ function install() {
 	source ~/.zprofile;
 }
 
-if [ "$1" == "--force" -o "$1" == "-f" ]; then
+if [[ "$1" == "--force" ]] || [[ "$1" == "-f" ]]; then
 	install;
 else
-	read -p "This may overwrite existing files in your home directory. Are you sure? (y/n) " -n 1;
+	vared -p "This may overwrite existing files in your home directory. Are you sure? (y/n) " -c REPLY;
 
 	echo "";
 
