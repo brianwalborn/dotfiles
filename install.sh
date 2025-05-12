@@ -1,29 +1,39 @@
 #!/usr/bin/env zsh
 
-cd "$(dirname "${ZSH_SOURCE}")";
+backup_file() {
+  local target="$1"
 
-git pull origin main;
+  if [[ -e "$target" ]]; then
+    local backup="${target}.backup"
 
-function install() {
-	rsync --exclude ".git/" \
-		--exclude ".DS_Store" \
-		--exclude "install.sh" \
-  		--exclude "README.md" \
-		-avh --no-perms . ~;
-
-	source ~/.zprofile;
+    echo "--> backing up $target to $backup"
+    mv "$target" "$backup"
+  fi
 }
 
-if [[ "$1" == "--force" ]] || [[ "$1" == "-f" ]]; then
-	install;
-else
-	vared -p "This may overwrite existing files in your home directory. Are you sure? (y/n) " -c REPLY;
+install_dotfile() {
+  local file="$1"
+  local src="./$file"
+  local dest="$HOME/$file"
 
-	echo "";
+  backup_file "$dest"
 
-	if [[ $REPLY =~ ^[Yy]$ ]]; then
-		install;
-	fi;
-fi;
+  echo "--> copying $file to $dest"
+  cp "$src" "$dest"
+}
 
-unset install;
+install_all_dotfiles() {
+  echo "--> copying dotfiles from $(pwd)..."
+
+  for file in .[^.]*; do
+    if [[ -f "$file" ]]; then
+      install_dotfile "$file"
+    fi
+  done
+
+  source "$HOME/.zprofile"
+
+  echo "--> installation complete!"
+}
+
+install_all_dotfiles
