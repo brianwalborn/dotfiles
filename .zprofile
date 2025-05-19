@@ -6,6 +6,11 @@ for file in ~/.{path,zprompt,exports,aliases,functions}; do
 done;
 unset file;
 
+# load homebrew into the shell
+if [ -r "/opt/homebrew/bin/brew" ]; then
+   eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
 # https://code.visualstudio.com/remote/advancedcontainers/sharing-git-credentials#_using-ssh-keys
 if [ -z "$SSH_AUTH_SOCK" ]; then
    # Check for a currently running instance of the agent
