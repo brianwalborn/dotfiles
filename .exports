@@ -1,5 +1,8 @@
 #!/usr/bin/env zsh
 
+# bun
+export BUN_INSTALL="$HOME/.bun"
+
 # Make vi the default editor.
 export EDITOR='vi';
 
