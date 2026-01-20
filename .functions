@@ -6,3 +6,15 @@ function clean() {
 
   for BRANCH in "${DELETED_BRANCHES[@]}"; do git branch -D $BRANCH; done
 }
+
+# hijack docker commands to add shortcuts
+function docker() {
+    case "$1" in
+        lsc) shift; command docker container ls "$@" ;;
+        lsi) shift; command docker image ls "$@" ;;
+        lsv) shift; command docker volume ls "$@" ;;
+        rmc) shift; command docker container rm "$@" ;;
+        rmv) shift; command docker volume rm "$@" ;;
+        *) command docker "$@" ;;
+    esac
+}
