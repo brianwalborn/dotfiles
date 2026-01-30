@@ -5,9 +5,9 @@ precmd() { vcs_info; }
 zstyle ':vcs_info:git:*' formats '%b';
 setopt PROMPT_SUBST;
 
-# include kubernetes context if kubectl is installed
+# include kubernetes context if kubectl is installed and a context is set
 if type "kubectl" > /dev/null; then
-  PROMPT='%F{49}%n%f %F{39}[$(kubectl config current-context)]%f %1d %F{208}(${vcs_info_msg_0_})%f λ ';
+  PROMPT='%F{49}%n%f $(ctx=$(kubectl config current-context 2>/dev/null); [[ -n "$ctx" ]] && echo "%F{39}[$ctx]%f ")%1d %F{208}(${vcs_info_msg_0_})%f λ ';
 else
   PROMPT='%F{49}%n%f %1d %F{208}(${vcs_info_msg_0_})%f λ ';
 fi
