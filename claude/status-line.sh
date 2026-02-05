@@ -11,15 +11,18 @@ USAGE_PCT=$(echo "$input" | jq -r '.context_window.used_percentage')
 
 # git branch if in a git repo
 BRANCH=$(git -C "$CWD" rev-parse --abbrev-ref HEAD 2>/dev/null)
+REPO=$(git config --get remote.origin.url | sed 's/.*\///' | sed 's/\.git$//')
 
 # color codes
 CYAN='\033[0;36m'
 GREEN='\033[0;32m'
+MAGENTA='\033[0;35m'
 YELLOW='\033[0;33m'
 RESET='\033[0m'
 
 # build status line
-printf "${CYAN}%s${RESET} | ${GREEN}%s${RESET} | ctx: ${YELLOW}%.1f%%${RESET}" \
+printf "${CYAN}%s${RESET} in ${MAGENTA}%s${RESET} | ${GREEN}%s${RESET} | ctx: ${YELLOW}%.1f%%${RESET}" \
   "$MODEL" \
+  "$REPO" \
   "${BRANCH:-$CWD}" \
   "$USAGE_PCT"
