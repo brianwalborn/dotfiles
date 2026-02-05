@@ -1,0 +1,9 @@
+{
+  "defaultMode": "acceptEdits",
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/status-line.sh",
+    "padding": 0
+  },
+  "spinnerTipsEnabled": false
+}

@@ -1,4 +1,6 @@
-# Load the shell dotfiles, and then some:
+#!/usr/bin/env zsh
+
+# load the shell dotfiles, and then some:
 # * ~/.path can be used to extend `$PATH`.
 # * ~/.extra can be used for other settings you don’t want to commit.
 for file in ~/.{path,zprompt,exports,aliases,functions}; do

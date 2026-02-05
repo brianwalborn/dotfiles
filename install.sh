@@ -22,6 +22,36 @@ install_dotfile() {
   cp "$src" "$dest"
 }
 
+install_claude_config() {
+  local claude_dir="$HOME/.claude"
+
+  echo "--> installing claude configuration..."
+
+  if [[ ! -d "$claude_dir" ]]; then
+    echo "--> creating $claude_dir directory"
+    mkdir -p "$claude_dir"
+  fi
+
+  for file in claude/*; do
+    if [[ -f "$file" ]]; then
+      local filename=$(basename "$file")
+      local dest="$claude_dir/$filename"
+
+      # special handling for settings.json - don't overwrite existing config
+      if [[ "$filename" == "settings.json" && -f "$dest" ]]; then
+        echo "--> skipping settings.json (already exists)"
+        echo "    please manually merge ./claude/settings.json with $dest"
+        continue
+      fi
+
+      backup_file "$dest"
+
+      echo "--> copying $file to $dest"
+      cp "$file" "$dest"
+    fi
+  done
+}
+
 install_all_dotfiles() {
   echo "--> copying dotfiles from $(pwd)..."
 
@@ -30,6 +60,8 @@ install_all_dotfiles() {
       install_dotfile "$file"
     fi
   done
+
+  install_claude_config
 
   source "$HOME/.zprofile"
 
