@@ -7,6 +7,14 @@ function clean() {
   for BRANCH in "${DELETED_BRANCHES[@]}"; do git branch -D $BRANCH; done
 }
 
+# hijack devcontainer commands to add defaults
+function devcontainer() {
+    case "$1" in
+        up) shift; command devcontainer up --dotfiles-repository https://github.com/brianwalborn/dotfiles.git "$@" ;;
+        *) command devcontainer "$@" ;;
+    esac
+}
+
 # hijack docker commands to add shortcuts
 function docker() {
     case "$1" in
@@ -18,3 +26,4 @@ function docker() {
         *) command docker "$@" ;;
     esac
 }
+
