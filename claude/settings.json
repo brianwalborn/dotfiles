@@ -1,9 +1,70 @@
 {
-  "defaultMode": "acceptEdits",
+  "allowedTools": [
+    // general
+    "Edit",
+    "Read",
+    "Write",
+
+    // aws cli
+    "Bash(aws * describe*)",
+    "Bash(aws * get*)",
+    "Bash(aws * list*)",
+    "Bash(aws sts get-caller-identity)",
+
+    // git
+    "Bash(git add *)",
+    "Bash(git branch *)",
+    "Bash(git checkout *)",
+    "Bash(git cherry-pick *)",
+    "Bash(git commit *)",
+    "Bash(git diff *)",
+    "Bash(git fetch *)",
+    "Bash(git log *)",
+    "Bash(git merge *)",
+    "Bash(git rebase *)",
+    "Bash(git stash *)",
+    "Bash(git status *)",
+    "Bash(git switch *)",
+    "Bash(git worktree *)",
+
+    // github
+    "Bash(gh pr *)",
+
+    // go
+    "Bash(go run *)",
+    "Bash(go build *)",
+    "Bash(go test *)",
+    "Bash(go mod *)",
+    "Bash(go vet *)",
+    "Bash(go fmt *)",
+    "Bash(go generate *)",
+
+    // kubectl
+    "Bash(kubectl describe *)",
+    "Bash(kubectl get *)",
+    "Bash(kubectl logs *)",
+
+    // node
+    "Bash(npm *)",
+    "Bash(pnpm *)",
+
+    // terraform / tofu
+    "Bash(terraform fmt *)",
+    "Bash(tofu fmt *)",
+    "Bash(terraform init *)",
+    "Bash(tofu init *)"
+  ],
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true,
+    "superpowers@superpowers-marketplace": true,
+    "ud-eng@underdog-ai-tools": true
+  },
+  "model": "opus[1m]",
   "statusLine": {
     "type": "command",
     "command": "~/.claude/status-line.sh",
     "padding": 0
   },
-  "spinnerTipsEnabled": false
+  "spinnerTipsEnabled": false,
+  "defaultMode": "acceptEdits"
 }
