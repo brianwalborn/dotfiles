@@ -52,6 +52,36 @@ install_claude_config() {
   done
 }
 
+install_docker_config() {
+  local docker_dir="$HOME/.docker"
+
+  echo "--> installing docker configuration..."
+
+  if [[ ! -d "$docker_dir" ]]; then
+    echo "--> creating $docker_dir directory"
+    mkdir -p "$docker_dir"
+  fi
+
+  for file in docker/*; do
+    if [[ -f "$file" ]]; then
+      local filename=$(basename "$file")
+      local dest="$docker_dir/$filename"
+
+      # special handling for config.json - don't overwrite existing config
+      if [[ "$filename" == "config.json" && -f "$dest" ]]; then
+        echo "--> skipping config.json (already exists)"
+        echo "    please manually merge ./docker/config.json with $dest"
+        continue
+      fi
+
+      backup_file "$dest"
+
+      echo "--> copying $file to $dest"
+      cp "$file" "$dest"
+    fi
+  done
+}
+
 install_all_dotfiles() {
   echo "--> copying dotfiles from $(pwd)..."
 
@@ -62,6 +92,7 @@ install_all_dotfiles() {
   done
 
   install_claude_config
+  install_docker_config
 
   source "$HOME/.zprofile"
 
