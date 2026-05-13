@@ -1,13 +1,26 @@
 #!/usr/bin/env zsh
 
-autoload -Uz vcs_info context;
-precmd() { vcs_info; }
+autoload -Uz vcs_info;
+precmd() { vcs_info; };
 zstyle ':vcs_info:git:*' formats '%b';
 setopt PROMPT_SUBST;
 
-# include kubernetes context if kubectl is installed and a context is set
-if type "kubectl" > /dev/null; then
-  PROMPT='%F{49}%n%f $(ctx=$(kubectl config current-context 2>/dev/null); [[ -n "$ctx" ]] && echo "%F{39}[$ctx]%f ")%1d %F{208}(${vcs_info_msg_0_})%f λ ';
-else
-  PROMPT='%F{49}%n%f %1d %F{208}(${vcs_info_msg_0_})%f λ ';
-fi
+# Nerd Font icons — requires a Nerd Font in your terminal (e.g. JetBrainsMono Nerd Font).
+ICON_DIR=$'';
+ICON_GIT=$'';
+ICON_K8S=$'';
+ICON_USER=$'';
+
+# Each conditional segment carries its own trailing separator so the prompt collapses cleanly when absent.
+_git_segment() {
+  [[ -n "${vcs_info_msg_0_}" ]] && echo "%F{208}${ICON_GIT} ${vcs_info_msg_0_}%f ";
+}
+
+_kube_segment() {
+  (( $+commands[kubectl] )) || return;
+  local ctx;
+  ctx=$(kubectl config current-context 2>/dev/null);
+  [[ -n "$ctx" ]] && echo "%F{39}${ICON_K8S} ${ctx}%f  ";
+}
+
+PROMPT='%F{49}'"${ICON_USER}"' %n%f  $(_kube_segment)%F{250}'"${ICON_DIR}"' %1d%f  $(_git_segment)» ';
