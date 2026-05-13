@@ -27,3 +27,23 @@ function docker() {
     esac
 }
 
+eks() {
+    case "${1}" in
+      auth)
+        local cluster_name="${2:?Usage: eks auth <cluster_name> [region] [profile]}"
+        local region="${3:-us-east-2}"
+        local profile_flag=""
+
+        if [[ -n "${4}" ]]; then
+          profile_flag="--profile ${4}"
+        fi
+
+        aws eks update-kubeconfig --region "${region}" --name "${cluster_name}" ${profile_flag}
+        ;;
+      *)
+        echo "Usage: eks <command>"
+        echo "Commands:"
+        echo "  auth <cluster_name> [region] [profile]  - Update kubeconfig for an EKS cluster"
+        ;;
+    esac
+  }
