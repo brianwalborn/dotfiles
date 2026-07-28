@@ -1,23 +1,24 @@
 #!/usr/bin/env zsh
 
+# .zprofile runs `brew shellenv` before sourcing this, so `brew` resolves below.
+
 # asdf
 export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH";
 
 # bun
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-# homebrew
-if type "brew" > /dev/null; then
-  eval "$(/opt/homebrew/bin/brew shellenv)";
+# uv
+[ -r "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env";
 
+if type "brew" > /dev/null; then
   # go
   export GOPATH=$HOME/go;
   export GOROOT="$(brew --prefix golang)/libexec";
   export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin";
 
-  # postgres
-  export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH";
-  export PATH="/usr/local/opt/libpq/bin:$PATH";
+  # postgres client; --prefix keeps this working on both brew prefixes
+  export PATH="$(brew --prefix libpq)/bin:$PATH";
 fi
 
 # pnpm
