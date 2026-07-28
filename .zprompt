@@ -5,22 +5,51 @@ precmd() { vcs_info; };
 zstyle ':vcs_info:git:*' formats '%b';
 setopt PROMPT_SUBST;
 
-# Nerd Font icons — requires a Nerd Font in your terminal (e.g. JetBrainsMono Nerd Font).
-ICON_DIR=$'';
-ICON_GIT=$'';
-ICON_K8S=$'';
-ICON_USER=$'';
+# Powerline separator — requires a Nerd Font in your terminal (e.g. JetBrainsMono Nerd Font).
+SEPARATOR=$'';
 
-# Each conditional segment carries its own trailing separator so the prompt collapses cleanly when absent.
-_git_segment() {
-  [[ -n "${vcs_info_msg_0_}" ]] && echo "%F{208}${ICON_GIT} ${vcs_info_msg_0_}%f ";
+# Text color drawn on top of every colored segment background.
+SEGMENT_FOREGROUND=235;
+
+# Each segment is "color:text"; absent segments simply never get added, so the
+# arrow chain stays continuous no matter which ones are present.
+_prompt_segments() {
+  local context;
+
+  echo "49:%n";
+
+  if (( $+commands[kubectl] )); then
+    context=$(kubectl config current-context 2>/dev/null);
+    [[ -n "$context" ]] && echo "39:${context}";
+  fi;
+
+  echo "250:%1d";
+
+  [[ -n "${vcs_info_msg_0_}" ]] && echo "208:${vcs_info_msg_0_}";
 }
 
-_kube_segment() {
-  (( $+commands[kubectl] )) || return;
-  local ctx;
-  ctx=$(kubectl config current-context 2>/dev/null);
-  [[ -n "$ctx" ]] && echo "%F{39}${ICON_K8S} ${ctx}%f  ";
+# Render the segments as a chain: each arrow is painted in its own segment's
+# color over the following segment's background, and the last one over the
+# terminal default.
+_prompt_powerline() {
+  local color index next_color segment text;
+  local -a segments;
+  segments=("${(@f)$(_prompt_segments)}");
+
+  for index in {1..${#segments}}; do
+    segment="${segments[index]}";
+    color="${segment%%:*}";
+    text="${segment#*:}";
+    next_color="${segments[index+1]%%:*}";
+
+    print -n "%K{${color}}%F{${SEGMENT_FOREGROUND}} ${text} %f%k";
+
+    if [[ -n "$next_color" ]]; then
+      print -n "%K{${next_color}}%F{${color}}${SEPARATOR}%f%k";
+    else
+      print -n "%F{${color}}${SEPARATOR}%f";
+    fi;
+  done;
 }
 
-PROMPT='%F{49}'"${ICON_USER}"' %n%f  $(_kube_segment)%F{250}'"${ICON_DIR}"' %1d%f  $(_git_segment)» ';
+PROMPT='$(_prompt_powerline) ';
