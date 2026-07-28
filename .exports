@@ -3,6 +3,9 @@
 # bun
 export BUN_INSTALL="$HOME/.bun"
 
+# talk to colima's docker socket rather than Docker Desktop's
+export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock";
+
 # Make vi the default editor.
 export EDITOR='vi';
 

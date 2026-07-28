@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+
+# asyncapi
+ASYNCAPI_COMPLETIONS="$HOME/Library/Caches/@asyncapi/cli/autocomplete/zsh_setup";
+[ -f "$ASYNCAPI_COMPLETIONS" ] && source "$ASYNCAPI_COMPLETIONS";
+unset ASYNCAPI_COMPLETIONS;
+
+# bun
+[ -s "$BUN_INSTALL/_bun" ] && source "$BUN_INSTALL/_bun";

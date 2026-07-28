@@ -22,77 +22,89 @@ install_dotfile() {
   cp "$src" "$dest"
 }
 
-install_claude_config() {
-  local claude_dir="$HOME/.claude"
+# Copies a config directory into place, recursing through subdirectories. Any
+# trailing arguments name files that are left alone when they already exist,
+# for configs that accumulate machine-local state.
+install_config_dir() {
+  local source_dir="$1"
+  local dest_dir="$2"
+  shift 2
+  local protected_files=("$@")
 
-  echo "--> installing claude configuration..."
+  echo "--> installing $source_dir configuration..."
 
-  if [[ ! -d "$claude_dir" ]]; then
-    echo "--> creating $claude_dir directory"
-    mkdir -p "$claude_dir"
-  fi
+  local source_file
+  for source_file in "./$source_dir"/**/*(.N); do
+    local relative_path="${source_file#./$source_dir/}"
+    local dest="$dest_dir/$relative_path"
 
-  for file in claude/*; do
-    if [[ -f "$file" ]]; then
-      local filename=$(basename "$file")
-      local dest="$claude_dir/$filename"
-
-      # special handling for settings.json - don't overwrite existing config
-      if [[ "$filename" == "settings.json" && -f "$dest" ]]; then
-        echo "--> skipping settings.json (already exists)"
-        echo "    please manually merge ./claude/settings.json with $dest"
-        continue
-      fi
-
-      backup_file "$dest"
-
-      echo "--> copying $file to $dest"
-      cp "$file" "$dest"
+    if (( ${protected_files[(Ie)$relative_path]} )) && [[ -f "$dest" ]]; then
+      echo "--> skipping $relative_path (already exists)"
+      echo "    please manually merge $source_file with $dest"
+      continue
     fi
+
+    backup_file "$dest"
+
+    mkdir -p "$(dirname "$dest")"
+
+    echo "--> copying $source_file to $dest"
+    cp "$source_file" "$dest"
   done
 }
 
-install_docker_config() {
-  local docker_dir="$HOME/.docker"
+# Configs are inert without the binaries behind them, so this runs first.
+install_packages() {
+  if ! type brew > /dev/null 2>&1; then
+    echo "--> homebrew not found, installing it..."
+    # The installer prompts for sudo and a confirmation. Export NONINTERACTIVE=1
+    # beforehand to skip both when running this unattended.
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-  echo "--> installing docker configuration..."
+    # The installer leaves the calling shell untouched, so brew has to be put on
+    # PATH here before the bundle below can find it. .zprofile does the same on
+    # every login.
+    if [[ -r "/opt/homebrew/bin/brew" ]]; then
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+    fi
 
-  if [[ ! -d "$docker_dir" ]]; then
-    echo "--> creating $docker_dir directory"
-    mkdir -p "$docker_dir"
+    if ! type brew > /dev/null 2>&1; then
+      echo "--> homebrew installation failed, skipping packages"
+      return
+    fi
   fi
 
-  for file in docker/*; do
-    if [[ -f "$file" ]]; then
-      local filename=$(basename "$file")
-      local dest="$docker_dir/$filename"
-
-      # special handling for config.json - don't overwrite existing config
-      if [[ "$filename" == "config.json" && -f "$dest" ]]; then
-        echo "--> skipping config.json (already exists)"
-        echo "    please manually merge ./docker/config.json with $dest"
-        continue
-      fi
-
-      backup_file "$dest"
-
-      echo "--> copying $file to $dest"
-      cp "$file" "$dest"
-    fi
-  done
+  echo "--> installing homebrew packages..."
+  # --no-upgrade because `brew bundle` upgrades outdated dependencies by default,
+  # and quietly upgrading toolchains like go and node is not what someone running
+  # a dotfiles install is asking for. Run `brew bundle upgrade` deliberately.
+  brew bundle install --file=./Brewfile --no-upgrade
 }
 
 install_all_dotfiles() {
+  install_packages
+
   echo "--> copying dotfiles from $(pwd)..."
 
   for file in .[^.]*; do
+    # Skip git's own metadata. Inside a worktree .git is a file rather than a
+    # directory, so it would otherwise be copied and make $HOME look like a repo.
+    case "$file" in
+      .git | .gitignore) continue ;;
+    esac
+
     if [[ -f "$file" ]]; then
       install_dotfile "$file"
     fi
   done
 
-  install_claude_config
-  install_docker_config
+  install_config_dir "claude" "$HOME/.claude" "settings.json"
+  # colima only reads _templates when creating an instance, so this never
+  # disturbs an existing VM; it shapes the next one.
+  install_config_dir "colima" "$HOME/.colima"
+  install_config_dir "docker" "$HOME/.docker" "config.json"
+  install_config_dir "kitty" "${XDG_CONFIG_HOME:-$HOME/.config}/kitty"
+  install_config_dir "nvim" "${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
 
   source "$HOME/.zprofile"
 
