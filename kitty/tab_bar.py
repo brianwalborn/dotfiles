@@ -12,6 +12,10 @@ powerline renderer picks the separator color out of the next tab.
 from kitty.fast_data_types import Screen
 from kitty.tab_bar import DrawData, ExtraData, TabBarData, as_rgb, draw_tab_with_powerline
 
+# How much of a tab's pastel hue survives in its background when the tab is
+# focused; the rest is white, which lifts the focused tab above its neighbors.
+ACTIVE_BACKGROUND_TINT = 0.8
+
 # Kept in sync with `background` in kitty.conf: pastel tabs need a dark color to
 # print their titles in and to dim inactive tabs toward.
 BACKGROUND = '#18181C'
@@ -19,6 +23,8 @@ BACKGROUND = '#18181C'
 # How much of a tab's pastel hue survives in its background when the tab is not
 # focused. Every tab stays visibly colored; the focused one is just brighter.
 INACTIVE_BACKGROUND_TINT = 0.65
+
+WHITE = '#FFFFFF'
 
 PASTEL_RAINBOW = (
     '#FFADAD',  # red
@@ -49,14 +55,14 @@ def colorized(tab: TabBarData | None, index: int) -> TabBarData | None:
     """Copy `tab` with its slot in the pastel rainbow baked into its colors.
 
     Every tab is a block of its pastel with a dark title on it. The focused tab
-    gets the pastel at full strength and the rest are muted, so the rainbow reads
-    as one row without the focused tab getting lost in it.
+    gets its pastel brightened toward white and the rest are muted, so the rainbow
+    reads as one row without the focused tab getting lost in it.
     """
     if tab is None:
         return None
     pastel = PASTEL_RAINBOW[(index - 1) % len(PASTEL_RAINBOW)]
     return tab._replace(
-        active_bg=as_integer(pastel),
+        active_bg=blended(pastel, WHITE, ACTIVE_BACKGROUND_TINT),
         active_fg=as_integer(BACKGROUND),
         inactive_bg=blended(pastel, BACKGROUND, INACTIVE_BACKGROUND_TINT),
         inactive_fg=as_integer(BACKGROUND),
