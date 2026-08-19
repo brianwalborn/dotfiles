@@ -7,7 +7,7 @@ export BUN_INSTALL="$HOME/.bun"
 export DOCKER_HOST="unix://$HOME/.colima/default/docker.sock";
 
 # Make vi the default editor.
-export EDITOR='vi';
+export EDITOR='nvim';
 
 # Avoid issues with `gpg` as installed via Homebrew.
 # https://stackoverflow.com/a/42265848/96656
