@@ -13,6 +13,10 @@ alias pull="git pull"
 alias stage="git add ."
 alias status="git status"
 
+# kitty
+alias dark="kitty_theme dark"
+alias light="kitty_theme light"
+
 # kubernetes
 alias ctx_certification="export AWS_PROFILE=cert && kubectl config use-context cert"
 alias ctx_develop="export AWS_PROFILE=develop && kubectl config use-context develop"

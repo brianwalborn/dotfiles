@@ -7,22 +7,28 @@ a pastel rainbow by position.
 
 The neighboring tabs handed over in `extra_data` are recolored too, because the
 powerline renderer picks the separator color out of the next tab.
+
+Nothing here is hardcoded to a theme: the background comes from
+`draw_data.default_bg`, so the pastels re-tune themselves when the `light` and
+`dark` aliases swap themes.
 """
 
-from kitty.fast_data_types import Screen
+from kitty.fast_data_types import Color, Screen
 from kitty.tab_bar import DrawData, ExtraData, TabBarData, as_rgb, draw_tab_with_powerline
 
 # How much of a tab's pastel hue survives in its background when the tab is
-# focused; the rest is white, which lifts the focused tab above its neighbors.
+# focused; the rest is pulled toward EMPHASIS, which lifts the focused tab above
+# its neighbors.
 ACTIVE_BACKGROUND_TINT = 0.8
 
-# Kept in sync with `background` in kitty.conf: pastel tabs need a dark color to
-# print their titles in and to dim inactive tabs toward.
-BACKGROUND = '#18181C'
+BLACK = '#000000'
 
 # How much of a tab's pastel hue survives in its background when the tab is not
 # focused. Every tab stays visibly colored; the focused one is just brighter.
 INACTIVE_BACKGROUND_TINT = 0.65
+
+# Tab titles are always dark, because the pastels are light in either theme.
+INK = '#18181C'
 
 WHITE = '#FFFFFF'
 
@@ -42,30 +48,32 @@ def as_integer(color: str) -> int:
     return int(color.lstrip('#'), 16)
 
 
-def blended(color: str, other: str, fraction: float) -> int:
+def blended(color: int, other: int, fraction: float) -> int:
     """Mix `fraction` of `color` with `1 - fraction` of `other`."""
-    first, second = as_integer(color), as_integer(other)
     return sum(
-        round(((first >> shift) & 0xFF) * fraction + ((second >> shift) & 0xFF) * (1 - fraction)) << shift
+        round(((color >> shift) & 0xFF) * fraction + ((other >> shift) & 0xFF) * (1 - fraction)) << shift
         for shift in (0, 8, 16)
     )
 
 
-def colorized(tab: TabBarData | None, index: int) -> TabBarData | None:
+def colorized(background: Color, tab: TabBarData | None, index: int) -> TabBarData | None:
     """Copy `tab` with its slot in the pastel rainbow baked into its colors.
 
     Every tab is a block of its pastel with a dark title on it. The focused tab
-    gets its pastel brightened toward white and the rest are muted, so the rainbow
-    reads as one row without the focused tab getting lost in it.
+    gets its pastel pushed away from the background and the rest are muted toward
+    it, so the rainbow reads as one row without the focused tab getting lost in
+    it. Which direction "away" is depends on the theme: pastels brighten toward
+    white on a dark background and deepen toward black on a light one.
     """
     if tab is None:
         return None
-    pastel = PASTEL_RAINBOW[(index - 1) % len(PASTEL_RAINBOW)]
+    emphasis = as_integer(WHITE if background.is_dark else BLACK)
+    pastel = as_integer(PASTEL_RAINBOW[(index - 1) % len(PASTEL_RAINBOW)])
     return tab._replace(
-        active_bg=blended(pastel, WHITE, ACTIVE_BACKGROUND_TINT),
-        active_fg=as_integer(BACKGROUND),
-        inactive_bg=blended(pastel, BACKGROUND, INACTIVE_BACKGROUND_TINT),
-        inactive_fg=as_integer(BACKGROUND),
+        active_bg=blended(pastel, emphasis, ACTIVE_BACKGROUND_TINT),
+        active_fg=as_integer(INK),
+        inactive_bg=blended(pastel, int(background), INACTIVE_BACKGROUND_TINT),
+        inactive_fg=as_integer(INK),
     )
 
 
@@ -84,9 +92,10 @@ def draw_tab(
     # background back off the cursor rather than off the tab. The recolored tabs
     # still have to be passed along, because the separator between two tabs is
     # drawn in the *next* tab's background.
-    colored_tab = colorized(tab, index)
-    extra_data.prev_tab = colorized(extra_data.prev_tab, index - 1)
-    extra_data.next_tab = colorized(extra_data.next_tab, index + 1)
+    background = draw_data.default_bg
+    colored_tab = colorized(background, tab, index)
+    extra_data.prev_tab = colorized(background, extra_data.prev_tab, index - 1)
+    extra_data.next_tab = colorized(background, extra_data.next_tab, index + 1)
     screen.cursor.bg = as_rgb(draw_data.tab_bg(colored_tab))
     screen.cursor.fg = as_rgb(draw_data.tab_fg(colored_tab))
     return draw_tab_with_powerline(

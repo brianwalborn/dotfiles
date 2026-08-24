@@ -27,6 +27,28 @@ function docker() {
     esac
 }
 
+# switch the kitty color theme; `light` and `dark` in .aliases are the front door
+function kitty_theme() {
+    local theme="${1:?Usage: kitty_theme <name>   (one of ~/.config/kitty/themes/*.conf)}"
+    local directory="${HOME}/.config/kitty/themes"
+
+    if [[ ! -f "${directory}/${theme}.conf" ]]; then
+        local -a available=(${directory}/*.conf(:t:r))
+        echo "No such theme: ${theme}. Available: ${available}" >&2
+        return 1
+    fi
+
+    ln -sfn "themes/${theme}.conf" "${HOME}/.config/kitty/theme.conf"
+
+    # New kitty windows pick the theme up from the symlink on their own; the
+    # reload is only for windows that are already open.
+    if [[ -n "${KITTY_LISTEN_ON}" ]]; then
+        kitty @ load-config
+    else
+        echo "Switched to ${theme}. Remote control is off in this window: press cmd+opt+, to reload, or restart kitty once to have this reload itself from now on."
+    fi
+}
+
 eks() {
     case "${1}" in
       auth)
